@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d18">
+<title>US100 · Trade Calculator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  color-scheme:dark;
+  --bg:#080d18;--panel:#101a2b;--panel-soft:#0c1524;--line:#24334a;
+  --text:#edf4ff;--muted:#91a1b9;--blue:#8db7ff;--mint:#65e0b3;
+  --red:#ff8294;--gold:#f1c879;--radius:22px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;padding:34px 18px 26px;color:var(--text);
+  background:radial-gradient(ellipse at 12% 0%,rgba(49,91,155,.24),transparent 36%),
+             radial-gradient(ellipse at 92% 22%,rgba(31,125,105,.12),transparent 30%),var(--bg);
+  font:15px/1.55 'DM Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+}
+button,input,select{font:inherit}
+.wrap{max-width:1050px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 27px}
+.brand{display:flex;align-items:center;gap:13px}
+.logo{
+  width:46px;height:46px;display:grid;place-items:center;border-radius:15px;
+  color:#a9caff;background:linear-gradient(145deg,#1b3558,#122238);
+  border:1px solid #345174;box-shadow:0 8px 25px #0004
+}
+.logo svg{width:23px;height:23px}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.19em;text-transform:uppercase;color:var(--blue)}
+h1{font:700 clamp(25px,4vw,35px)/1.12 'Space Grotesk',sans-serif;letter-spacing:-.045em;margin:4px 0 5px}
+.sub{color:var(--muted);margin:0;font-size:13px}
+.market-pill{display:flex;align-items:center;gap:9px;padding:9px 13px;border:1px solid #2b405c;background:#101d30;border-radius:999px;color:#c9d9f0;font-size:11px;font-weight:700;letter-spacing:.06em}
+.market-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px #65e0b388}
+.layout{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:17px;align-items:start}
+.card{
+  min-width:0;padding:23px;border:1px solid var(--line);border-radius:var(--radius);
+  background:linear-gradient(155deg,rgba(18,29,47,.97),rgba(12,21,36,.98));
+  box-shadow:0 22px 60px rgba(0,0,0,.22)
+}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:19px}
+.card h2{font:700 17px 'Space Grotesk',sans-serif;margin:0 0 4px;letter-spacing:-.02em}
+.hint{font-size:12px;color:var(--muted);margin:0}
+.step{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:#1a2b43;border:1px solid #304663;color:#a9c7f5;font-size:11px;font-weight:800}
+.direction{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:5px;background:#091321;border:1px solid #1f3047;border-radius:14px;margin-bottom:19px}
+.direction button{
+  border:1px solid transparent;background:transparent;color:#8192aa;padding:11px 12px;
+  border-radius:10px;font-size:12px;font-weight:800;letter-spacing:.08em;cursor:pointer;transition:.18s ease
+}
+.direction button:hover{color:var(--text);background:#14243a}
+.direction button.active.buy{background:linear-gradient(135deg,#164b40,#12372f);border-color:#267b63;color:#83f0c5;box-shadow:inset 0 1px #ffffff12}
+.direction button.active.sell{background:linear-gradient(135deg,#512b3a,#351f2b);border-color:#91475b;color:#ff9cac;box-shadow:inset 0 1px #ffffff12}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field label{display:block;color:#c5d2e5;font-size:11px;font-weight:700;margin:0 0 7px}
+.field input,.field select{
+  width:100%;min-width:0;background:#091321;color:var(--text);border:1px solid #2a3b54;
+  border-radius:12px;padding:12px 13px;font-size:14px;outline:none;transition:border-color .18s,box-shadow .18s
+}
+.field input::placeholder{color:#596a83}
+.field input:focus,.field select:focus{border-color:#7eabed;box-shadow:0 0 0 3px #82aaff20}
+.field small{display:block;color:#71839e;font-size:10px;line-height:1.45;margin-top:6px}
+.wide{grid-column:1/-1}
+.warning{display:flex;gap:10px;align-items:flex-start;margin-top:17px;padding:12px 13px;border:1px solid #5a4b2d;border-radius:13px;background:rgba(65,49,23,.35);color:#e9d29d;font-size:11px;line-height:1.55}
+.warning svg{width:15px;height:15px;flex:0 0 15px;margin-top:1px}
+.actions{display:flex;gap:9px;margin-top:17px}
+.actions button{flex:1;border:1px solid #395473;background:linear-gradient(180deg,#203752,#182b43);color:#eaf2ff;padding:11px 13px;border-radius:12px;font-size:12px;font-weight:800;cursor:pointer;transition:.18s}
+.actions button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.actions button.secondary{background:#0c1727;border-color:#2b3b52;color:#9eafc7}
+.results{display:flex;flex-direction:column;gap:11px}
+.hero{
+  position:relative;overflow:hidden;padding:19px;border-radius:17px;
+  border:1px solid #2b705d;background:radial-gradient(circle at 100% 0%,#23604e66,transparent 45%),linear-gradient(135deg,#143b34,#102a2c)
+}
+.hero:after{content:"";position:absolute;width:140px;height:140px;right:-65px;bottom:-95px;border:1px solid #76d8b51c;border-radius:50%;box-shadow:0 0 0 18px #76d8b50a,0 0 0 38px #76d8b506}
+.hero .label{color:#a9d9c9;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.hero .amount{font:700 clamp(29px,5vw,39px)/1.2 'Space Grotesk',sans-serif;letter-spacing:-.045em;margin:7px 0 3px;color:#e5fff5;overflow-wrap:anywhere}
+.hero .note{font-size:11px;color:#a7cfc2}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#101c2e,#0b1524);min-width:0}
+.stat .k{font-size:10px;color:var(--muted);font-weight:600}
+.stat .v{font:700 clamp(16px,2.6vw,20px)/1.3 'Space Grotesk',sans-serif;margin-top:5px;overflow-wrap:anywhere}
+.stat.red .v{color:var(--red)}.stat.green .v{color:var(--mint)}.stat.blue .v{color:#a9c7ff}
+.summary{padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#0b1524}
+.summary-title{font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#8295b0;margin:0 0 5px}
+.summary-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #1d2b40;font-size:11px}
+.summary-row:last-child{border:0}.summary-row span:first-child{color:var(--muted)}
+.summary-row strong{text-align:right;color:#dce8f8;font-weight:700;overflow-wrap:anywhere}
+.footer{color:#64758e;font-size:10px;text-align:center;margin:18px 0 0}
+@media(max-width:760px){
+  body{padding:24px 13px}.layout{grid-template-columns:1fr;gap:13px}.card{padding:19px}
+  .top{align-items:flex-start;margin-bottom:20px}.market-pill{font-size:10px;padding:8px 10px}
+}
+@media(max-width:430px){
+  .market-pill{display:none}.fields{gap:12px}.field input,.field select{padding:11px 10px;font-size:13px}
+  .card{padding:16px;border-radius:18px}.hero{padding:17px}.actions button{padding:11px 8px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 8.2 12l3.4 3.2L20.5 6"/><path d="M15.5 6h5v5"/></svg>
+      </div>
+      <div>
+        <div class="eyebrow">Trading workspace</div>
+        <h1>US100 Calculator</h1>
+        <p class="sub">Plan the risk. Know the reward. Trade with clarity.</p>
+      </div>
+    </div>
+    <div class="market-pill"><span class="market-dot"></span> US100 <span style="color:#60748f">/</span> EXNESS</div>
+  </header>
+
+  <main class="layout">
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Set up your trade</h2><p class="hint">Enter your prices and position details.</p></div>
+        <span class="step">01</span>
+      </div>
+      <div class="direction" role="group" aria-label="Trade direction">
+        <button id="buy" class="active buy" type="button" aria-pressed="true">↗ &nbsp; BUY</button>
+        <button id="sell" type="button" aria-pressed="false">↘ &nbsp; SELL</button>
+      </div>
+      <div class="fields">
+        <div class="field"><label for="entry">ENTRY PRICE</label><input id="entry" type="number" step="any" placeholder="e.g. 21000"></div>
+        <div class="field"><label for="lot">LOT SIZE</label><input id="lot" type="number" min="0" step="any" value="0.10"></div>
+        <div class="field"><label for="sl">STOP-LOSS PRICE</label><input id="sl" type="number" step="any" placeholder="Your exit if wrong"></div>
+        <div class="field"><label for="tp">TAKE-PROFIT PRICE</label><input id="tp" type="number" step="any" placeholder="Your target price"></div>
+        <div class="field"><label for="currency">ACCOUNT CURRENCY</label><select id="currency"><option>USD</option><option>ZAR</option><option>EUR</option><option>GBP</option></select></div>
+        <div class="field"><label for="pointvalue">VALUE PER POINT · 1.00 LOT</label><input id="pointvalue" type="number" min="0" step="any" value="1"><small>Check your Exness US100 contract specifications.</small></div>
+      </div>
+      <div class="warning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.8 19a1.4 1.4 0 0 0 1.2 2h16a1.4 1.4 0 0 0 1.2-2L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>
+        <span><strong>Important:</strong> The point value starts at 1 as an example only. Your actual US100 contract value may differ. Verify it with Exness before relying on the money estimates.</span>
+      </div>
+      <div class="actions">
+        <button id="reset" class="secondary" type="button">Reset fields</button>
+        <button id="copy" type="button">Copy trade summary&nbsp; ↗</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div><h2>Trade breakdown</h2><p class="hint">Your estimated outcome at the selected prices.</p></div>
+        <span class="step">02</span>
+      </div>
+      <div class="results">
+        <div class="hero">
+          <div class="label">Potential profit at take profit</div>
+          <div class="amount" id="profit">—</div>
+          <div class="note" id="profitnote">Enter your entry and target price</div>
+        </div>
+        <div class="stats">
+          <div class="stat red"><div class="k">RISK IF STOP-LOSS HITS</div><div class="v" id="risk">—</div></div>
+          <div class="stat blue"><div class="k">RISK : REWARD</div><div class="v" id="rr">—</div></div>
+          <div class="stat"><div class="k">STOP-LOSS DISTANCE</div><div class="v" id="slpoints">—</div></div>
+          <div class="stat"><div class="k">TARGET DISTANCE</div><div class="v" id="tppoints">—</div></div>
+        </div>
+        <div class="summary">
+          <p class="summary-title">Trade summary</p>
+          <div class="summary-row"><span>Trade direction</span><strong id="direction">BUY</strong></div>
+          <div class="summary-row"><span>Lot size</span><strong id="lotsummary">0.10</strong></div>
+          <div class="summary-row"><span>Potential outcome</span><strong id="outcome">Waiting for prices</strong></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <p class="footer">ESTIMATES ONLY · Spread, commission, swaps and slippage can change the final result.</p>
+</div>
+<script>
+let side='BUY';
+const $=id=>document.getElementById(id);
+const num=id=>Number($(id).value);
+const fmt=n=>Number.isFinite(n)?n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+const money=n=>$('currency').value+' '+fmt(n);
+function setSide(s){
+  side=s;
+  $('buy').className=s==='BUY'?'active buy':'';
+  $('sell').className=s==='SELL'?'active sell':'';
+  $('buy').setAttribute('aria-pressed',String(s==='BUY'));
+  $('sell').setAttribute('aria-pressed',String(s==='SELL'));
+  $('direction').textContent=s;
+  calc();
+}
+$('buy').onclick=()=>setSide('BUY');
+$('sell').onclick=()=>setSide('SELL');
+function calc(){
+  const e=num('entry'),sl=num('sl'),tp=num('tp'),lot=num('lot'),pv=num('pointvalue');
+  const ready=['entry','sl','tp','lot','pointvalue'].every(id=>$(id).value.trim()!=='')&&[e,sl,tp,lot,pv].every(Number.isFinite)&&lot>0&&pv>=0;
+  $('lotsummary').textContent=Number.isFinite(lot)?fmt(lot):'—';
+  if(!ready){
+    $('profit').textContent='—';$('risk').textContent='—';$('rr').textContent='—';
+    $('slpoints').textContent='—';$('tppoints').textContent='—';
+    $('profitnote').textContent='Enter entry, stop-loss, take-profit and lot size';
+    $('outcome').textContent='Waiting for prices';return;
+  }
+  const riskPts=side==='BUY'?e-sl:sl-e;
+  const rewardPts=side==='BUY'?tp-e:e-tp;
+  const valid=riskPts>0&&rewardPts>0;
+  $('slpoints').textContent=fmt(Math.abs(e-sl))+' pts';
+  $('tppoints').textContent=fmt(Math.abs(tp-e))+' pts';
+  if(!valid){
+    $('profit').textContent='Check prices';$('risk').textContent='—';$('rr').textContent='—';
+    $('profitnote').textContent=side==='BUY'?'BUY: stop below entry and target above entry.':'SELL: stop above entry and target below entry.';
+    $('outcome').textContent='Check stop-loss and target';return;
+  }
+  const riskMoney=riskPts*lot*pv,rewardMoney=rewardPts*lot*pv,ratio=rewardPts/riskPts;
+  $('profit').textContent=money(rewardMoney);$('risk').textContent=money(riskMoney);
+  $('rr').textContent='1 : '+ratio.toFixed(2);
+  $('profitnote').textContent=fmt(rewardPts)+' points to your target';
+  $('outcome').textContent=money(rewardMoney)+' potential profit / '+money(riskMoney)+' risk';
+}
+['entry','sl','tp','lot','currency','pointvalue'].forEach(id=>$(id).addEventListener('input',calc));
+$('reset').onclick=()=>{
+  ['entry','sl','tp'].forEach(id=>$(id).value='');
+  $('lot').value='0.10';$('pointvalue').value='1';$('currency').value='USD';
+  setSide('BUY');calc();
+};
+$('copy').onclick=async()=>{
+  const text=`US100 ${side}\nEntry: ${$('entry').value}\nStop loss: ${$('sl').value} (${ $('slpoints').textContent})\nTake profit: ${$('tp').value} (${ $('tppoints').textContent})\nLot size: ${$('lot').value}\nPotential risk: ${$('risk').textContent}\nPotential profit: ${$('profit').textContent}\nRisk:Reward: ${$('rr').textContent}\nPoint value used: ${$('pointvalue').value} per point per 1.00 lot`;
+  try{
+    await navigator.clipboard.writeText(text);
+    $('copy').textContent='Copied ✓';
+    setTimeout(()=>$('copy').textContent='Copy trade summary ↗',1600);
+  }catch(e){$('copy').textContent='Copy unavailable';}
+};
+calc();
+</script>
+</body>
+</html>
