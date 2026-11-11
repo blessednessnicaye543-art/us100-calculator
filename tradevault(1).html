@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1220"><title>TradeVault — Trading Journal</title>
+<style>
+:root{--bg:#0b1220;--panel:#111c2e;--panel2:#162338;--line:#26364d;--text:#edf3fb;--muted:#91a2b9;--green:#32d296;--red:#ff6b78;--blue:#75a7ff;--gold:#e8bd68}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#142944 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:24px 18px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#39d6a0,#2c8fda);display:grid;place-items:center;color:#06131e;font-weight:900;font-size:20px}.brand h1{font-size:20px;margin:0;letter-spacing:.3px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:10px;font-weight:650;cursor:pointer;font-size:13px}button.primary{background:#2fc995;color:#062016;border:0}button.danger{color:var(--red)}button:hover{filter:brightness(1.12)}
+h2{font-size:17px;margin:0 0 14px}.sub{color:var(--muted);font-size:13px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat,.panel{background:linear-gradient(160deg,#142239,#101a2b);border:1px solid var(--line);border-radius:16px;padding:17px}.stat .label{font-size:12px;color:var(--muted)}.stat .value{font-size:25px;font-weight:750;margin-top:7px;letter-spacing:-.5px}.positive{color:var(--green)}.negative{color:var(--red)}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-bottom:16px}.fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}label{font-size:12px;color:var(--muted)}input,select,textarea{width:100%;background:#0b1525;border:1px solid #2a3a52;color:var(--text);border-radius:9px;padding:10px 11px;font:inherit;font-size:14px;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--blue)}textarea{min-height:70px;resize:vertical}.formfoot{display:flex;gap:9px;margin-top:13px;align-items:center}.hint{font-size:11px;color:var(--muted);margin-top:9px}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.quick span{background:#0c1728;border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:12px;color:var(--muted)}
+.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}.toolbar input{max-width:240px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #24344a;font-size:13px;white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}td small{color:var(--muted)}.pill{padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700;background:#203149}.empty{text-align:center;padding:34px;color:var(--muted)}.mini{padding:6px 8px;font-size:11px}.footer{margin-top:18px;color:var(--muted);font-size:11px;text-align:center}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.wrap{padding:17px 12px 45px}.stat .value{font-size:22px}.top{align-items:flex-start}.brand h1{font-size:18px}}
+@media(max-width:420px){.fieldgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.actions button{padding:8px 9px}.stat{padding:13px}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand"><div class="logo">T</div><div><h1>TRADEVAULT</h1><p>YOUR TRADING. YOUR DATA. YOUR EDGE.</p></div></div><div class="actions"><button id="exportBtn">Export CSV</button><button id="backupBtn">Backup JSON</button><button id="importBtn">Restore</button><input id="restoreFile" type="file" accept="application/json" hidden></div></header>
+<div class="quick"><span>● Practice journal</span><span>● Stored on this device</span><span>● No broker connection required</span></div>
+<section class="stats">
+<div class="stat"><div class="label">TOTAL TRADES</div><div class="value" id="total">0</div></div>
+<div class="stat"><div class="label">WIN RATE</div><div class="value" id="winrate">0%</div></div>
+<div class="stat"><div class="label">NET P&L</div><div class="value" id="net">R0.00</div></div>
+<div class="stat"><div class="label">PROFIT FACTOR</div><div class="value" id="pf">—</div></div>
+<div class="stat"><div class="label">WINNERS</div><div class="value positive" id="wins">0</div></div>
+<div class="stat"><div class="label">LOSERS</div><div class="value negative" id="losses">0</div></div>
+<div class="stat"><div class="label">AVERAGE WIN</div><div class="value positive" id="avgwin">R0.00</div></div>
+<div class="stat"><div class="label">AVERAGE LOSS</div><div class="value negative" id="avgloss">R0.00</div></div>
+</section>
+<section class="grid">
+<div class="panel"><h2 id="formTitle">＋ Log a trade</h2><form id="tradeForm">
+<div class="fieldgrid">
+<div class="field"><label for="date">DATE</label><input id="date" type="date" required></div>
+<div class="field"><label for="market">MARKET / SYMBOL</label><input id="market" placeholder="e.g. XAUUSD, NAS100" required></div>
+<div class="field"><label for="direction">DIRECTION</label><select id="direction"><option>Long</option><option>Short</option></select></div>
+<div class="field"><label for="setup">STRATEGY / SETUP</label><input id="setup" placeholder="e.g. Break & retest"></div>
+<div class="field"><label for="entry">ENTRY PRICE</label><input id="entry" type="number" step="any" placeholder="0.00"></div>
+<div class="field"><label for="exit">EXIT PRICE</label><input id="exit" type="number" step="any" placeholder="0.00"></div>
+<div class="field"><label for="risk">RISK AMOUNT (R)</label><input id="risk" type="number" min="0" step="any" placeholder="e.g. 100"></div>
+<div class="field"><label for="pnl">PROFIT / LOSS (R)</label><input id="pnl" type="number" step="any" placeholder="e.g. 150 or -100" required></div>
+<div class="field"><label for="result">TRADE TYPE</label><select id="result"><option value="Auto">Auto from P&L</option><option value="Win">Win</option><option value="Loss">Loss</option><option value="Break-even">Break-even</option></select></div>
+<div class="field"><label for="emotion">EMOTION</label><select id="emotion"><option>Calm</option><option>Confident</option><option>Fearful</option><option>Greedy</option><option>Frustrated</option><option>FOMO</option></select></div>
+<div class="field full"><label for="notes">NOTES / LESSON LEARNED</label><textarea id="notes" placeholder="Why did you enter? Did you follow your rules? What can you improve?"></textarea></div>
+</div><div class="formfoot"><button class="primary" type="submit" id="saveBtn">Save trade</button><button type="button" id="cancelEdit" hidden>Cancel edit</button></div><div class="hint">Enter your realised P&L as a positive number for profit and a negative number for loss. Use the same currency for every trade.</div>
+</form></div>
+<div class="panel"><div class="sectionhead"><h2>Trading discipline</h2><span class="pill">Review every session</span></div><p class="sub">Use these questions after each trade to build consistency, not just chase profits.</p>
+<div style="display:grid;gap:10px;margin-top:17px">
+<label style="display:flex;gap:9px;align-items:center;color:var(--text)"><input type="checkbox" style="width:auto"> I followed my entry rules</label>
+<label style="display:flex;gap:9px;align-items:center;color:var(--text)"><input type="checkbox" style="width:auto"> I respected my stop loss and risk</label>
+<label style="display:flex;gap:9px;align-items:center;color:var(--text)"><input type="checkbox" style="width:auto"> I avoided revenge trading</label>
+<label style="display:flex;gap:9px;align-items:center;color:var(--text)"><input type="checkbox" style="width:auto"> I recorded the lesson from this trade</label>
+</div><p class="hint">A good trade follows your plan, even if it loses. A bad trade breaks your rules, even if it wins.</p>
+</div></section>
+<section class="panel"><div class="sectionhead"><div><h2>Trade history</h2><div class="sub" id="countLabel">All recorded trades</div></div></div>
+<div class="toolbar"><input id="search" placeholder="Search symbol or setup…"><select id="filter" style="max-width:150px"><option value="All">All results</option><option>Win</option><option>Loss</option><option>Break-even</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Date</th><th>Market</th><th>Direction</th><th>Setup</th><th>P&L</th><th>Result</th><th>Emotion</th><th>Actions</th></tr></thead><tbody id="tradeRows"></tbody></table><div class="empty" id="empty">No trades yet. Log your first practice trade above.</div></div>
+</section>
+<div class="footer">TradeVault is a personal practice journal, not a broker or financial adviser. Your journal data stays in this browser unless you export it. Back it up regularly.</div>
+</main>
+<script>
+const KEY='tradevault_records_v1';let trades=[];let editing=null;
+try{trades=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(trades))trades=[]}catch(e){trades=[]}
+const $=id=>document.getElementById(id), money=n=>'R'+Number(n||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+function save(){localStorage.setItem(KEY,JSON.stringify(trades));render()}
+function classify(t){return t.result==='Auto'?(+t.pnl>0?'Win':(+t.pnl<0?'Loss':'Break-even')):t.result}
+function render(){
+ const wins=trades.filter(t=>classify(t)==='Win'),losses=trades.filter(t=>classify(t)==='Loss'),grossWin=wins.reduce((s,t)=>s+Math.max(0,+t.pnl),0),grossLoss=losses.reduce((s,t)=>s+Math.abs(Math.min(0,+t.pnl)),0),net=trades.reduce((s,t)=>s+(+t.pnl||0),0);
+ $('total').textContent=trades.length;$('winrate').textContent=trades.length?(wins.length/trades.length*100).toFixed(1)+'%':'0%';$('net').textContent=money(net);$('net').className='value '+(net>0?'positive':net<0?'negative':'');$('pf').textContent=grossLoss?(grossWin/grossLoss).toFixed(2):grossWin?'∞':'—';$('wins').textContent=wins.length;$('losses').textContent=losses.length;$('avgwin').textContent=money(wins.length?grossWin/wins.length:0);$('avgloss').textContent=money(losses.length?-grossLoss/losses.length:0);
+ const q=$('search').value.toLowerCase(),f=$('filter').value;const rows=trades.filter(t=>(f==='All'||classify(t)===f)&&(`${t.market} ${t.setup}`.toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date));
+ $('tradeRows').innerHTML=rows.map(t=>{let c=classify(t);return `<tr><td>${esc(t.date)}</td><td><b>${esc(t.market)}</b></td><td>${esc(t.direction)}</td><td>${esc(t.setup||'—')}</td><td class="${+t.pnl>0?'positive':+t.pnl<0?'negative':''}">${money(t.pnl)}</td><td><span class="pill">${c}</span></td><td>${esc(t.emotion||'—')}</td><td><button class="mini" onclick="editTrade('${t.id}')">Edit</button> <button class="mini danger" onclick="deleteTrade('${t.id}')">Delete</button></td></tr>`}).join('');
+ $('empty').style.display=rows.length?'none':'block';$('countLabel').textContent=`Showing ${rows.length} of ${trades.length} trades`;
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const fields=['date','market','direction','setup','entry','exit','risk','pnl','result','emotion','notes'];
+function clearForm(){fields.forEach(k=>$(k).value=k==='direction'?'Long':k==='result'?'Auto':k==='emotion'?'Calm':'');$('date').value=new Date().toISOString().slice(0,10);editing=null;$('formTitle').textContent='＋ Log a trade';$('saveBtn').textContent='Save trade';$('cancelEdit').hidden=true}
+$('tradeForm').addEventListener('submit',e=>{e.preventDefault();let t={};fields.forEach(k=>t[k]=$(k).value);if(!t.market.trim())return;if(editing){let i=trades.findIndex(x=>x.id===editing);if(i>=0)trades[i]={...trades[i],...t}}else trades.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),...t});save();clearForm()});
+window.editTrade=id=>{let t=trades.find(x=>x.id===id);if(!t)return;fields.forEach(k=>$(k).value=t[k]??'');editing=id;$('formTitle').textContent='Edit trade';$('saveBtn').textContent='Update trade';$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})};
+window.deleteTrade=id=>{if(confirm('Delete this trade permanently from this browser?')){trades=trades.filter(t=>t.id!==id);save();if(editing===id)clearForm()}};
+$('cancelEdit').onclick=clearForm;$('search').oninput=render;$('filter').onchange=render;
+function download(name,data,type){let a=document.createElement('a'),u=URL.createObjectURL(new Blob([data],{type}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+$('exportBtn').onclick=()=>{let cols=['date','market','direction','setup','entry','exit','risk','pnl','result','emotion','notes'];let csv=[cols.join(','),...trades.map(t=>cols.map(k=>'"'+String(t[k]??'').replace(/"/g,'""')+'"').join(','))].join('\n');download('tradevault-trades.csv',csv,'text/csv')};
+$('backupBtn').onclick=()=>download('tradevault-backup.json',JSON.stringify(trades,null,2),'application/json');
+$('importBtn').onclick=()=>$('restoreFile').click();$('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let x=JSON.parse(await f.text());if(!Array.isArray(x)||!confirm(`Restore ${x.length} trades? This replaces the trades currently saved in this browser.`))return;trades=x;save();alert('Backup restored.')}catch(err){alert('That backup file could not be read.')}e.target.value=''};
+clearForm();render();
+</script></body></html>
